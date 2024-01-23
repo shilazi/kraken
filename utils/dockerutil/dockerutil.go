@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"reflect"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
@@ -27,6 +29,18 @@ import (
 	"github.com/uber/kraken/core"
 	"github.com/uber/kraken/utils/log"
 )
+
+var (
+	runtimePlatform manifestlist.PlatformSpec
+)
+
+// init runtimePlatform and unknownPlatform for match os and arch
+func init() {
+	runtimePlatform = manifestlist.PlatformSpec{
+		OS:           os.Getenv("RUNTIME_OS"),
+		Architecture: os.Getenv("RUNTIME_ARCH"),
+	}
+}
 
 func ParseManifest(r io.Reader) (distribution.Manifest, core.Digest, error) {
 	b, err := ioutil.ReadAll(r)
@@ -114,6 +128,22 @@ func ParseManifestV2List(bytes []byte) (distribution.Manifest, core.Digest, erro
 	d, err := core.ParseSHA256Digest(string(desc.Digest))
 	if err != nil {
 		return nil, core.Digest{}, fmt.Errorf("parse digest: %s", err)
+	}
+
+	// filtrate and remain matched platform
+	var matchedPlatformManifests []manifestlist.ManifestDescriptor
+	for _, manifest := range deserializedManifestList.ManifestList.Manifests {
+		if reflect.DeepEqual(manifest.Platform, runtimePlatform) {
+			matchedPlatformManifests = append(matchedPlatformManifests, manifest)
+			break
+		}
+		log.Debugf("manifest mismatched platform: %s/%s", manifest.Platform.OS, manifest.Platform.Architecture)
+	}
+	manifestList = manifestlist.DeserializedManifestList{
+		ManifestList: manifestlist.ManifestList{
+			Versioned: deserializedManifestList.Versioned,
+			Manifests: matchedPlatformManifests,
+		},
 	}
 	return manifestList, d, nil
 }

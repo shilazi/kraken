@@ -115,7 +115,8 @@ $ make images
 
 To build the all-in-one Docker image:
 ```
-$ docker build --push \
+$ docker buildx build --push \
+      --platform linux/amd64,linux/arm64 \
       --file docker/all-in-one/Dockerfile \
       --tag ghcr.io/shilazi/kraken:v0.1.5 . \
       --label org.opencontainers.image.source=https://github.com/shilazi/kraken
