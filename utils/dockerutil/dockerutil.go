@@ -21,12 +21,12 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
+	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/uber/kraken/core"
+	"github.com/uber/kraken/utils/log"
 )
-
-const _v2ManifestType = "application/vnd.docker.distribution.manifest.v2+json"
-const _v2ManifestListType = "application/vnd.docker.distribution.manifest.list.v2+json"
 
 func ParseManifest(r io.Reader) (distribution.Manifest, core.Digest, error) {
 	b, err := ioutil.ReadAll(r)
@@ -46,14 +46,40 @@ func ParseManifest(r io.Reader) (distribution.Manifest, core.Digest, error) {
 // ParseManifestV2 returns a parsed v2 manifest and its digest.
 func ParseManifestV2(bytes []byte) (distribution.Manifest, core.Digest, error) {
 	manifest, desc, err := distribution.UnmarshalManifest(schema2.MediaTypeManifest, bytes)
+	var ociMediaType bool
 	if err != nil {
-		return nil, core.Digest{}, fmt.Errorf("unmarshal manifest: %s", err)
+		ociMediaType = true
+		manifest, desc, err = distribution.UnmarshalManifest(v1.MediaTypeImageManifest, bytes)
+		if err != nil {
+			return nil, core.Digest{}, fmt.Errorf("unmarshal manifest: %s", err)
+		} else {
+			log.Debugf("unmarshal oci manifest success with mediaType: %s", v1.MediaTypeImageManifest)
+		}
+	} else {
+		log.Debugf("unmarshal docker manifest success with mediaType: %s", schema2.MediaTypeManifest)
 	}
-	deserializedManifest, ok := manifest.(*schema2.DeserializedManifest)
-	if !ok {
-		return nil, core.Digest{}, errors.New("expected schema2.DeserializedManifest")
+
+	var version int
+	var expectedErr error
+	if ociMediaType {
+		deserializedManifest, ok := manifest.(*ocischema.DeserializedManifest)
+		if ok {
+			version = deserializedManifest.Manifest.Versioned.SchemaVersion
+		} else {
+			expectedErr = errors.New("expected ocischema.DeserializedManifest")
+		}
+	} else {
+		deserializedManifest, ok := manifest.(*schema2.DeserializedManifest)
+		if ok {
+			version = deserializedManifest.Manifest.Versioned.SchemaVersion
+		} else {
+			expectedErr = errors.New("expected schema2.DeserializedManifest")
+		}
 	}
-	version := deserializedManifest.Manifest.Versioned.SchemaVersion
+	if expectedErr != nil {
+		return nil, core.Digest{}, expectedErr
+	}
+
 	if version != 2 {
 		return nil, core.Digest{}, fmt.Errorf("unsupported manifest version: %d", version)
 	}
@@ -68,7 +94,14 @@ func ParseManifestV2(bytes []byte) (distribution.Manifest, core.Digest, error) {
 func ParseManifestV2List(bytes []byte) (distribution.Manifest, core.Digest, error) {
 	manifestList, desc, err := distribution.UnmarshalManifest(manifestlist.MediaTypeManifestList, bytes)
 	if err != nil {
-		return nil, core.Digest{}, fmt.Errorf("unmarshal manifestlist: %s", err)
+		manifestList, desc, err = distribution.UnmarshalManifest(v1.MediaTypeImageIndex, bytes)
+		if err != nil {
+			return nil, core.Digest{}, fmt.Errorf("unmarshal manifestlist: %s", err)
+		} else {
+			log.Debugf("unmarshal oci index success with mediaType: %s", v1.MediaTypeImageIndex)
+		}
+	} else {
+		log.Debugf("unmarshal docker manifestlist success with mediaType: %s", manifestlist.MediaTypeManifestList)
 	}
 	deserializedManifestList, ok := manifestList.(*manifestlist.DeserializedManifestList)
 	if !ok {
@@ -99,5 +132,5 @@ func GetManifestReferences(manifest distribution.Manifest) ([]core.Digest, error
 }
 
 func GetSupportedManifestTypes() string {
-	return fmt.Sprintf("%s,%s", _v2ManifestType, _v2ManifestListType)
+	return fmt.Sprintf("%s,%s,%s,%s", schema2.MediaTypeManifest, manifestlist.MediaTypeManifestList, v1.MediaTypeImageManifest, v1.MediaTypeImageIndex)
 }

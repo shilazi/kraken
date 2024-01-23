@@ -25,6 +25,7 @@ import (
 	"github.com/uber/kraken/lib/backend"
 	"github.com/uber/kraken/lib/backend/backenderrors"
 	"github.com/uber/kraken/lib/backend/registrybackend/security"
+	"github.com/uber/kraken/utils/dockerutil"
 	"github.com/uber/kraken/utils/httputil"
 	"github.com/uber/kraken/utils/log"
 	yaml "gopkg.in/yaml.v2"
@@ -87,6 +88,10 @@ func (c *BlobClient) Stat(namespace, name string) (*core.BlobInfo, error) {
 	if err != nil && err == backenderrors.ErrBlobNotFound {
 		// Docker registry does not support querying manifests with blob path.
 		log.Infof("Blob %s unknown to registry. Tring to stat manifest instead", name)
+		opts = append(
+			opts,
+			httputil.SendHeaders(map[string]string{"Accept": dockerutil.GetSupportedManifestTypes()}),
+		)
 		info, err = c.statHelper(namespace, name, _manifestquery, opts)
 	}
 	return info, err
@@ -103,6 +108,10 @@ func (c *BlobClient) Download(namespace, name string, dst io.Writer) error {
 	if err != nil && err == backenderrors.ErrBlobNotFound {
 		// Docker registry does not support querying manifests with blob path.
 		log.Infof("Blob %s unknown to registry. Tring to download manifest instead", name)
+		opts = append(
+			opts,
+			httputil.SendHeaders(map[string]string{"Accept": dockerutil.GetSupportedManifestTypes()}),
+		)
 		err = c.downloadHelper(namespace, name, _manifestquery, dst, opts)
 	}
 	return err
