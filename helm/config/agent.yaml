@@ -4,5 +4,5 @@ extends: /etc/kraken/config/agent/base.yaml
 {{ include "build-index" . }}
 {{- with .Values.agent.allowedCidrs }}
 allowed_cidrs:
-{{ toYaml . | indent 2 }}
+{{ toYaml . }}
 {{- end }}

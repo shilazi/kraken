@@ -14,36 +14,36 @@ tracker:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
 #  extraVolumes:
-#    - name: data
-#      hostPath:
-#        path: /data/tracker
-#        type: DirectoryOrCreate
+#  - name: data
+#    hostPath:
+#      path: /data/tracker
+#      type: DirectoryOrCreate
 #  extraVolumeMounts:
+#  - name: data
+#    subPath: log
+#    mountPath: /var/log/kraken
+#  - name: data
+#    subPath: cache
+#    mountPath: /var/cache/kraken
+#  initContainers:
+#  - name: busybox
+#    image: busybox:1.35
+#    command:
+#    - sh
+#    args:
+#    - -c
+#    - |
+#      mkdir -p /var/log/kraken/kraken-tracker
+#      mkdir -p /var/cache/kraken/kraken-tracker
+#    volumeMounts:
+#    - name: config
+#      mountPath: /etc/config
 #    - name: data
 #      subPath: log
 #      mountPath: /var/log/kraken
 #    - name: data
 #      subPath: cache
 #      mountPath: /var/cache/kraken
-#  initContainers:
-#    - name: busybox
-#      image: busybox:1.35
-#      command:
-#        - sh
-#      args:
-#        - -c
-#        - |
-#          mkdir -p /var/log/kraken/kraken-tracker
-#          mkdir -p /var/cache/kraken/kraken-tracker
-#      volumeMounts:
-#        - name: config
-#          mountPath: /etc/config
-#        - name: data
-#          subPath: log
-#          mountPath: /var/log/kraken
-#        - name: data
-#          subPath: cache
-#          mountPath: /var/cache/kraken
 
 build_index:
   config: /etc/config/build-index.yaml
@@ -56,36 +56,36 @@ build_index:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
 #  extraVolumes:
-#    - name: data
-#      hostPath:
-#        path: /data/build-index
-#        type: DirectoryOrCreate
+#  - name: data
+#    hostPath:
+#      path: /data/build-index
+#      type: DirectoryOrCreate
 #  extraVolumeMounts:
+#  - name: data
+#    subPath: log
+#    mountPath: /var/log/kraken
+#  - name: data
+#    subPath: cache
+#    mountPath: /var/cache/kraken
+#  initContainers:
+#  - name: busybox
+#    image: busybox:1.35
+#    command:
+#    - sh
+#    args:
+#    - -c
+#    - |
+#      mkdir -p /var/log/kraken/kraken-build-index
+#      mkdir -p /var/cache/kraken/kraken-build-index
+#    volumeMounts:
+#    - name: config
+#      mountPath: /etc/config
 #    - name: data
 #      subPath: log
 #      mountPath: /var/log/kraken
 #    - name: data
 #      subPath: cache
 #      mountPath: /var/cache/kraken
-#  initContainers:
-#    - name: busybox
-#      image: busybox:1.35
-#      command:
-#        - sh
-#      args:
-#        - -c
-#        - |
-#          mkdir -p /var/log/kraken/kraken-build-index
-#          mkdir -p /var/cache/kraken/kraken-build-index
-#      volumeMounts:
-#        - name: config
-#          mountPath: /etc/config
-#        - name: data
-#          subPath: log
-#          mountPath: /var/log/kraken
-#        - name: data
-#          subPath: cache
-#          mountPath: /var/cache/kraken
 #  extraBackends: |-
 #    - namespace: library/.*
 #      backend:
@@ -107,36 +107,36 @@ origin:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
 #  extraVolumes:
-#    - name: data
-#      hostPath:
-#        path: /data/origin
-#        type: DirectoryOrCreate
+#  - name: data
+#    hostPath:
+#      path: /data/origin
+#      type: DirectoryOrCreate
 #  extraVolumeMounts:
+#  - name: data
+#    subPath: log
+#    mountPath: /var/log/kraken
+#  - name: data
+#    subPath: cache
+#    mountPath: /var/cache/kraken
+#  initContainers:
+#  - name: busybox
+#    image: busybox:1.35
+#    command:
+#    - sh
+#    args:
+#    - -c
+#    - |
+#      mkdir -p /var/log/kraken/kraken-origin
+#      mkdir -p /var/cache/kraken/kraken-origin
+#    volumeMounts:
+#    - name: config
+#      mountPath: /etc/config
 #    - name: data
 #      subPath: log
 #      mountPath: /var/log/kraken
 #    - name: data
 #      subPath: cache
 #      mountPath: /var/cache/kraken
-#  initContainers:
-#    - name: busybox
-#      image: busybox:1.35
-#      command:
-#        - sh
-#      args:
-#        - -c
-#        - |
-#          mkdir -p /var/log/kraken/kraken-origin
-#          mkdir -p /var/cache/kraken/kraken-origin
-#      volumeMounts:
-#        - name: config
-#          mountPath: /etc/config
-#        - name: data
-#          subPath: log
-#          mountPath: /var/log/kraken
-#        - name: data
-#          subPath: cache
-#          mountPath: /var/cache/kraken
 #  extraBackends: |-
 #    - namespace: library/.*
 #      backend:
@@ -157,47 +157,47 @@ proxy:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
 #  extraVolumes:
-#    - name: data
-#      hostPath:
-#        path: /data/proxy
-#        type: DirectoryOrCreate
+#  - name: data
+#    hostPath:
+#      path: /data/proxy
+#      type: DirectoryOrCreate
 #  extraVolumeMounts:
+#  - name: data
+#    subPath: log
+#    mountPath: /var/log/kraken
+#  - name: data
+#    subPath: cache
+#    mountPath: /var/cache/kraken
+#  initContainers:
+#  - name: busybox
+#    image: busybox:1.35
+#    command:
+#    - sh
+#    args:
+#    - -c
+#    - |
+#      mkdir -p /var/log/kraken/kraken-proxy
+#      mkdir -p /var/cache/kraken/kraken-proxy
+#    volumeMounts:
+#    - name: config
+#      mountPath: /etc/config
 #    - name: data
 #      subPath: log
 #      mountPath: /var/log/kraken
 #    - name: data
 #      subPath: cache
 #      mountPath: /var/cache/kraken
-#  initContainers:
-#    - name: busybox
-#      image: busybox:1.35
-#      command:
-#        - sh
-#      args:
-#        - -c
-#        - |
-#          mkdir -p /var/log/kraken/kraken-proxy
-#          mkdir -p /var/cache/kraken/kraken-proxy
-#      volumeMounts:
-#        - name: config
-#          mountPath: /etc/config
-#        - name: data
-#          subPath: log
-#          mountPath: /var/log/kraken
-#        - name: data
-#          subPath: cache
-#          mountPath: /var/cache/kraken
 
 agent:
   config: /etc/config/agent.yaml
   allowedCidrs:
-    - 127.0.0.1
-    - 172.17.0.1
-#    - 10.0.0.0/8
-#    - 172.16.0.0/12
-#    - 192.168.0.0/16
+  - 127.0.0.1
+  - 172.17.0.1
+#  - 10.0.0.0/8
+#  - 172.16.0.0/12
+#  - 192.168.0.0/16
   tolerations:
-#    - operator: Exists
+#  - operator: Exists
   annotations:
   extraVolumes:
   extraVolumeMounts:
@@ -205,36 +205,36 @@ agent:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
 #  extraVolumes:
-#    - name: data
-#      hostPath:
-#        path: /data/agent
-#        type: DirectoryOrCreate
+#  - name: data
+#    hostPath:
+#      path: /data/agent
+#      type: DirectoryOrCreate
 #  extraVolumeMounts:
+#  - name: data
+#    subPath: log
+#    mountPath: /var/log/kraken
+#  - name: data
+#    subPath: cache
+#    mountPath: /var/cache/kraken
+#  initContainers:
+#  - name: busybox
+#    image: busybox:1.35
+#    command:
+#    - sh
+#    args:
+#    - -c
+#    - |
+#      mkdir -p /var/log/kraken/kraken-agent
+#      mkdir -p /var/cache/kraken/kraken-agent
+#    volumeMounts:
+#    - name: config
+#      mountPath: /etc/config
 #    - name: data
 #      subPath: log
 #      mountPath: /var/log/kraken
 #    - name: data
 #      subPath: cache
 #      mountPath: /var/cache/kraken
-#  initContainers:
-#    - name: busybox
-#      image: busybox:1.35
-#      command:
-#        - sh
-#      args:
-#        - -c
-#        - |
-#          mkdir -p /var/log/kraken/kraken-agent
-#          mkdir -p /var/cache/kraken/kraken-agent
-#      volumeMounts:
-#        - name: config
-#          mountPath: /etc/config
-#        - name: data
-#          subPath: log
-#          mountPath: /var/log/kraken
-#        - name: data
-#          subPath: cache
-#          mountPath: /var/cache/kraken
 
 testfs:
   enabled: true
@@ -244,10 +244,10 @@ testfs:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
 #  extraVolumes:
-#    - name: data
-#      hostPath:
-#        path: /data/testfs
-#        type: DirectoryOrCreate
+#  - name: data
+#    hostPath:
+#      path: /data/testfs
+#      type: DirectoryOrCreate
 #  extraVolumeMounts:
-#    - name: data
-#      mountPath: /tmp
+#  - name: data
+#    mountPath: /tmp

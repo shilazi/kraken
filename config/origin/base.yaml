@@ -15,11 +15,11 @@ zap:
     durationEncoder: seconds
     callerEncoder: short
   outputPaths:
-    - stdout
-    - /var/log/kraken/kraken-origin/stdout.log
+  - stdout
+  - /var/log/kraken/kraken-origin/stdout.log
   errorOutputPaths:
-    - stdout
-    - /var/log/kraken/kraken-origin/stdout.log
+  - stderr
+  - /var/log/kraken/kraken-origin/stderr.log
 
 metainfogen:
   piece_lengths:
@@ -51,5 +51,5 @@ blobserver:
 
 nginx:
   name: kraken-origin
-  cache_dir: /var/cache/kraken/kraken-origin/nginx/
   log_dir: /var/log/kraken/kraken-origin/
+  cache_dir: /var/cache/kraken/kraken-origin/nginx/

@@ -25,11 +25,11 @@ zap:
     durationEncoder: seconds
     callerEncoder: short
   outputPaths:
-    - stdout
-    - /var/log/kraken/kraken-build-index/stdout.log
+  - stdout
+  - /var/log/kraken/kraken-build-index/stdout.log
   errorOutputPaths:
-    - stdout
-    - /var/log/kraken/kraken-build-index/stdout.log
+  - stderr
+  - /var/log/kraken/kraken-build-index/stderr.log
 
 metrics:
   m3:
@@ -42,5 +42,5 @@ tagserver:
 
 nginx:
   name: kraken-build-index
-  cache_dir: /var/cache/kraken/kraken-build-index/nginx/
   log_dir: /var/log/kraken/kraken-build-index/
+  cache_dir: /var/cache/kraken/kraken-build-index/nginx/
