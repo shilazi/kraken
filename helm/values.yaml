@@ -1,6 +1,6 @@
 kraken:
-  repository: gcr.io/uber-container-tools
-  tag: v0.1.4
+  repository: ghcr.io/shilazi/kraken
+  tag: v0.1.5
   imagePullPolicy: IfNotPresent
   registry_port: 30081
 
@@ -20,11 +20,14 @@ tracker:
 #      type: DirectoryOrCreate
 #  extraVolumeMounts:
 #  - name: data
+#    subPath: run
+#    mountPath: /var/kraken/run
+#  - name: data
 #    subPath: log
-#    mountPath: /var/log/kraken
+#    mountPath: /var/kraken/log
 #  - name: data
 #    subPath: cache
-#    mountPath: /var/cache/kraken
+#    mountPath: /var/kraken/cache
 #  initContainers:
 #  - name: busybox
 #    image: busybox:1.35
@@ -33,17 +36,12 @@ tracker:
 #    args:
 #    - -c
 #    - |
-#      mkdir -p /var/log/kraken/kraken-tracker
-#      mkdir -p /var/cache/kraken/kraken-tracker
+#      echo hello
 #    volumeMounts:
 #    - name: config
 #      mountPath: /etc/config
 #    - name: data
-#      subPath: log
-#      mountPath: /var/log/kraken
-#    - name: data
-#      subPath: cache
-#      mountPath: /var/cache/kraken
+#      mountPath: /var/kraken
 
 build_index:
   config: /etc/config/build-index.yaml
@@ -62,11 +60,14 @@ build_index:
 #      type: DirectoryOrCreate
 #  extraVolumeMounts:
 #  - name: data
+#    subPath: run
+#    mountPath: /var/kraken/run
+#  - name: data
 #    subPath: log
-#    mountPath: /var/log/kraken
+#    mountPath: /var/kraken/log
 #  - name: data
 #    subPath: cache
-#    mountPath: /var/cache/kraken
+#    mountPath: /var/kraken/cache
 #  initContainers:
 #  - name: busybox
 #    image: busybox:1.35
@@ -75,17 +76,12 @@ build_index:
 #    args:
 #    - -c
 #    - |
-#      mkdir -p /var/log/kraken/kraken-build-index
-#      mkdir -p /var/cache/kraken/kraken-build-index
+#      echo hello
 #    volumeMounts:
 #    - name: config
 #      mountPath: /etc/config
 #    - name: data
-#      subPath: log
-#      mountPath: /var/log/kraken
-#    - name: data
-#      subPath: cache
-#      mountPath: /var/cache/kraken
+#      mountPath: /var/kraken
 #  extraBackends: |-
 #    - namespace: library/.*
 #      backend:
@@ -113,11 +109,14 @@ origin:
 #      type: DirectoryOrCreate
 #  extraVolumeMounts:
 #  - name: data
+#    subPath: run
+#    mountPath: /var/kraken/run
+#  - name: data
 #    subPath: log
-#    mountPath: /var/log/kraken
+#    mountPath: /var/kraken/log
 #  - name: data
 #    subPath: cache
-#    mountPath: /var/cache/kraken
+#    mountPath: /var/kraken/cache
 #  initContainers:
 #  - name: busybox
 #    image: busybox:1.35
@@ -126,17 +125,12 @@ origin:
 #    args:
 #    - -c
 #    - |
-#      mkdir -p /var/log/kraken/kraken-origin
-#      mkdir -p /var/cache/kraken/kraken-origin
+#      echo hello
 #    volumeMounts:
 #    - name: config
 #      mountPath: /etc/config
 #    - name: data
-#      subPath: log
-#      mountPath: /var/log/kraken
-#    - name: data
-#      subPath: cache
-#      mountPath: /var/cache/kraken
+#      mountPath: /var/kraken
 #  extraBackends: |-
 #    - namespace: library/.*
 #      backend:
@@ -163,11 +157,14 @@ proxy:
 #      type: DirectoryOrCreate
 #  extraVolumeMounts:
 #  - name: data
+#    subPath: run
+#    mountPath: /var/kraken/run
+#  - name: data
 #    subPath: log
-#    mountPath: /var/log/kraken
+#    mountPath: /var/kraken/log
 #  - name: data
 #    subPath: cache
-#    mountPath: /var/cache/kraken
+#    mountPath: /var/kraken/cache
 #  initContainers:
 #  - name: busybox
 #    image: busybox:1.35
@@ -176,17 +173,12 @@ proxy:
 #    args:
 #    - -c
 #    - |
-#      mkdir -p /var/log/kraken/kraken-proxy
-#      mkdir -p /var/cache/kraken/kraken-proxy
+#      echo hello
 #    volumeMounts:
 #    - name: config
 #      mountPath: /etc/config
 #    - name: data
-#      subPath: log
-#      mountPath: /var/log/kraken
-#    - name: data
-#      subPath: cache
-#      mountPath: /var/cache/kraken
+#      mountPath: /var/kraken
 
 agent:
   config: /etc/config/agent.yaml
@@ -211,11 +203,14 @@ agent:
 #      type: DirectoryOrCreate
 #  extraVolumeMounts:
 #  - name: data
+#    subPath: run
+#    mountPath: /var/kraken/run
+#  - name: data
 #    subPath: log
-#    mountPath: /var/log/kraken
+#    mountPath: /var/kraken/log
 #  - name: data
 #    subPath: cache
-#    mountPath: /var/cache/kraken
+#    mountPath: /var/kraken/cache
 #  initContainers:
 #  - name: busybox
 #    image: busybox:1.35
@@ -224,17 +219,12 @@ agent:
 #    args:
 #    - -c
 #    - |
-#      mkdir -p /var/log/kraken/kraken-agent
-#      mkdir -p /var/cache/kraken/kraken-agent
+#      echo hello
 #    volumeMounts:
 #    - name: config
 #      mountPath: /etc/config
 #    - name: data
-#      subPath: log
-#      mountPath: /var/log/kraken
-#    - name: data
-#      subPath: cache
-#      mountPath: /var/cache/kraken
+#      mountPath: /var/kraken
 
 testfs:
   enabled: true

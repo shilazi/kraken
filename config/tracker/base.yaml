@@ -16,10 +16,10 @@ zap:
     callerEncoder: short
   outputPaths:
   - stdout
-  - /var/log/kraken/kraken-tracker/stdout.log
+  - /var/kraken/log/kraken-tracker-stdout.log
   errorOutputPaths:
   - stderr
-  - /var/log/kraken/kraken-tracker/stderr.log
+  - /var/kraken/log/kraken-tracker-stderr.log
 
 logging:
   level: info
@@ -43,5 +43,5 @@ trackerserver:
 
 nginx:
   name: kraken-tracker
-  log_dir: /var/log/kraken/kraken-tracker/
-  cache_dir: /var/cache/kraken/kraken-tracker/nginx/
+  log_dir: /var/kraken/log/
+  cache_dir: /var/kraken/cache/kraken-tracker-nginx/

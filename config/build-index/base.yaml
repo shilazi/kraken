@@ -1,9 +1,9 @@
 localdb:
-  source: /var/cache/kraken/kraken-build-index/index.db
+  source: /var/kraken/cache/kraken-build-index-index.db
 
 store:
-  upload_dir: /var/cache/kraken/kraken-build-index/upload/
-  cache_dir: /var/cache/kraken/kraken-build-index/cache/
+  upload_dir: /var/kraken/cache/kraken-build-index-upload/
+  cache_dir: /var/kraken/cache/kraken-build-index-cache/
 
 tag_store:
   write_through: true
@@ -26,10 +26,10 @@ zap:
     callerEncoder: short
   outputPaths:
   - stdout
-  - /var/log/kraken/kraken-build-index/stdout.log
+  - /var/kraken/log/kraken-build-index-stdout.log
   errorOutputPaths:
   - stderr
-  - /var/log/kraken/kraken-build-index/stderr.log
+  - /var/kraken/log/kraken-build-index-stderr.log
 
 metrics:
   m3:
@@ -42,5 +42,5 @@ tagserver:
 
 nginx:
   name: kraken-build-index
-  log_dir: /var/log/kraken/kraken-build-index/
-  cache_dir: /var/cache/kraken/kraken-build-index/nginx/
+  log_dir: /var/kraken/log/
+  cache_dir: /var/kraken/cache/kraken-build-index-nginx/

@@ -67,19 +67,19 @@ func (c *Config) applyDefaults() error {
 		if c.LogDir == "" {
 			return errors.New("one of log_dir or stdout_log_path must be set")
 		}
-		c.StdoutLogPath = filepath.Join(c.LogDir, "nginx-stdout.log")
+		c.StdoutLogPath = filepath.Join(c.LogDir, fmt.Sprintf("%s-nginx-stdout.log", c.Name))
 	}
 	if c.AccessLogPath == "" {
 		if c.LogDir == "" {
 			return errors.New("one of log_dir or access_log_path must be set")
 		}
-		c.AccessLogPath = filepath.Join(c.LogDir, "nginx-access.log")
+		c.AccessLogPath = filepath.Join(c.LogDir, fmt.Sprintf("%s-nginx-access.log", c.Name))
 	}
 	if c.ErrorLogPath == "" {
 		if c.LogDir == "" {
 			return errors.New("one of log_dir or error_log_path must be set")
 		}
-		c.ErrorLogPath = filepath.Join(c.LogDir, "nginx-error.log")
+		c.ErrorLogPath = filepath.Join(c.LogDir, fmt.Sprintf("%s-nginx-error.log", c.Name))
 	}
 	return nil
 }
