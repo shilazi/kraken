@@ -22,7 +22,7 @@ spec:
     spec:
       {{ with .Values.build_index.initContainers -}}
       initContainers:
-{{ toYaml . | indent 6 }}{{ end }}
+{{ toYaml . | indent 6 }}{{- end }}
       containers:
       - name: main
         image: {{ .Values.kraken.repository }}/kraken-build-index:{{ .Values.kraken.tag }}

@@ -1,28 +1,49 @@
 kraken:
   repository: gcr.io/uber-container-tools
-  tag: v0.1.1
+  tag: v0.1.4
   imagePullPolicy: IfNotPresent
   registry_port: 30081
 
 tracker:
   config: /etc/config/tracker.yaml
   replicas: 3
+  annotations:
   extraVolumes:
-#  - name: nginx-cache
-#    hostPath:
-#      path: /data/nginx
   extraVolumeMounts:
-#  - name: nginx-cache
-#    mountPath: /var/cache/kraken/kraken-origin/nginx/
+  initContainers:
 #  annotations: |
 #    foo.example.com/release: "{{ .Release.Name }}"
+#  extraVolumes:
+#    - name: data
+#      hostPath:
+#        path: /data/tracker
+#        type: DirectoryOrCreate
+#  extraVolumeMounts:
+#    - name: data
+#      subPath: log
+#      mountPath: /var/log/kraken
+#    - name: data
+#      subPath: cache
+#      mountPath: /var/cache/kraken
 #  initContainers:
-#    - name: foo
-#      image: alpine:latest
-#      command: ["sh", "-c", "echo hello"]
+#    - name: busybox
+#      image: busybox:1.35
+#      command:
+#        - sh
+#      args:
+#        - -c
+#        - |
+#          mkdir -p /var/log/kraken/kraken-tracker
+#          mkdir -p /var/cache/kraken/kraken-tracker
 #      volumeMounts:
 #        - name: config
 #          mountPath: /etc/config
+#        - name: data
+#          subPath: log
+#          mountPath: /var/log/kraken
+#        - name: data
+#          subPath: cache
+#          mountPath: /var/cache/kraken
 
 build_index:
   config: /etc/config/build-index.yaml
@@ -31,11 +52,45 @@ build_index:
   extraVolumes:
   extraVolumeMounts:
   initContainers:
+  extraBackends:
+#  annotations: |
+#    foo.example.com/release: "{{ .Release.Name }}"
+#  extraVolumes:
+#    - name: data
+#      hostPath:
+#        path: /data/build-index
+#        type: DirectoryOrCreate
+#  extraVolumeMounts:
+#    - name: data
+#      subPath: log
+#      mountPath: /var/log/kraken
+#    - name: data
+#      subPath: cache
+#      mountPath: /var/cache/kraken
+#  initContainers:
+#    - name: busybox
+#      image: busybox:1.35
+#      command:
+#        - sh
+#      args:
+#        - -c
+#        - |
+#          mkdir -p /var/log/kraken/kraken-build-index
+#          mkdir -p /var/cache/kraken/kraken-build-index
+#      volumeMounts:
+#        - name: config
+#          mountPath: /etc/config
+#        - name: data
+#          subPath: log
+#          mountPath: /var/log/kraken
+#        - name: data
+#          subPath: cache
+#          mountPath: /var/cache/kraken
 #  extraBackends: |-
 #    - namespace: library/.*
 #      backend:
 #        registry_tag:
-#          address: my.private.registry
+#          address: index.docker.io
 #          security:
 #            basic:
 #              username: "joebloggs"
@@ -48,11 +103,45 @@ origin:
   extraVolumes:
   extraVolumeMounts:
   initContainers:
+  extraBackends:
+#  annotations: |
+#    foo.example.com/release: "{{ .Release.Name }}"
+#  extraVolumes:
+#    - name: data
+#      hostPath:
+#        path: /data/origin
+#        type: DirectoryOrCreate
+#  extraVolumeMounts:
+#    - name: data
+#      subPath: log
+#      mountPath: /var/log/kraken
+#    - name: data
+#      subPath: cache
+#      mountPath: /var/cache/kraken
+#  initContainers:
+#    - name: busybox
+#      image: busybox:1.35
+#      command:
+#        - sh
+#      args:
+#        - -c
+#        - |
+#          mkdir -p /var/log/kraken/kraken-origin
+#          mkdir -p /var/cache/kraken/kraken-origin
+#      volumeMounts:
+#        - name: config
+#          mountPath: /etc/config
+#        - name: data
+#          subPath: log
+#          mountPath: /var/log/kraken
+#        - name: data
+#          subPath: cache
+#          mountPath: /var/cache/kraken
 #  extraBackends: |-
 #    - namespace: library/.*
 #      backend:
 #        registry_blob:
-#          address: my.private.registry
+#          address: index.docker.io
 #          security:
 #            basic:
 #              username: "joebloggs"
@@ -65,15 +154,100 @@ proxy:
   extraVolumes:
   extraVolumeMounts:
   initContainers:
+#  annotations: |
+#    foo.example.com/release: "{{ .Release.Name }}"
+#  extraVolumes:
+#    - name: data
+#      hostPath:
+#        path: /data/proxy
+#        type: DirectoryOrCreate
+#  extraVolumeMounts:
+#    - name: data
+#      subPath: log
+#      mountPath: /var/log/kraken
+#    - name: data
+#      subPath: cache
+#      mountPath: /var/cache/kraken
+#  initContainers:
+#    - name: busybox
+#      image: busybox:1.35
+#      command:
+#        - sh
+#      args:
+#        - -c
+#        - |
+#          mkdir -p /var/log/kraken/kraken-proxy
+#          mkdir -p /var/cache/kraken/kraken-proxy
+#      volumeMounts:
+#        - name: config
+#          mountPath: /etc/config
+#        - name: data
+#          subPath: log
+#          mountPath: /var/log/kraken
+#        - name: data
+#          subPath: cache
+#          mountPath: /var/cache/kraken
 
 agent:
   config: /etc/config/agent.yaml
+  allowedCidrs:
+    - 127.0.0.1
+    - 172.17.0.1
+#    - 10.0.0.0/8
+#    - 172.16.0.0/12
+#    - 192.168.0.0/16
+  tolerations:
+#    - operator: Exists
   annotations:
   extraVolumes:
   extraVolumeMounts:
   initContainers:
-  tolerations:
-#    - operator: "Exists"
+#  annotations: |
+#    foo.example.com/release: "{{ .Release.Name }}"
+#  extraVolumes:
+#    - name: data
+#      hostPath:
+#        path: /data/agent
+#        type: DirectoryOrCreate
+#  extraVolumeMounts:
+#    - name: data
+#      subPath: log
+#      mountPath: /var/log/kraken
+#    - name: data
+#      subPath: cache
+#      mountPath: /var/cache/kraken
+#  initContainers:
+#    - name: busybox
+#      image: busybox:1.35
+#      command:
+#        - sh
+#      args:
+#        - -c
+#        - |
+#          mkdir -p /var/log/kraken/kraken-agent
+#          mkdir -p /var/cache/kraken/kraken-agent
+#      volumeMounts:
+#        - name: config
+#          mountPath: /etc/config
+#        - name: data
+#          subPath: log
+#          mountPath: /var/log/kraken
+#        - name: data
+#          subPath: cache
+#          mountPath: /var/cache/kraken
+
 testfs:
   enabled: true
   annotations:
+  extraVolumes:
+  extraVolumeMounts:
+#  annotations: |
+#    foo.example.com/release: "{{ .Release.Name }}"
+#  extraVolumes:
+#    - name: data
+#      hostPath:
+#        path: /data/testfs
+#        type: DirectoryOrCreate
+#  extraVolumeMounts:
+#    - name: data
+#      mountPath: /tmp

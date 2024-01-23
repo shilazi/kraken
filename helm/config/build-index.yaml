@@ -22,7 +22,6 @@ tag_replication:
 tag_types:
   - namespace: .*
     type: docker
-    root: tags
 
 tag_store:
   write_through: false

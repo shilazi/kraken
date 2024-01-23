@@ -28,6 +28,15 @@ spec:
         command:
         - /usr/bin/kraken-testfs
         - --port=80
+{{- if not (empty .Values.testfs.extraVolumeMounts) }}
+        volumeMounts:
+{{- end }}
+{{ with .Values.testfs.extraVolumeMounts }}{{ toYaml . | indent 8 }}{{ end }}
+{{- if not (empty .Values.testfs.extraVolumes) }}
+      volumes:
+{{- end }}
+{{ with .Values.testfs.extraVolumes }}{{ toYaml . | indent 6 }}{{ end }}
+
 ---
 kind: Service
 apiVersion: v1

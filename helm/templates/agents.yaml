@@ -14,19 +14,17 @@ spec:
         app.kubernetes.io/name: kraken
         app.kubernetes.io/component: agent
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{ with .Values.agent.annotations }}
+      {{ with .Values.agent.annotations -}}
       annotations:
-{{ tpl . $ | indent 8 -}}
+{{ tpl . $ | indent 8 }}
       {{- end }}
     spec:
       {{ with .Values.agent.tolerations -}}
       tolerations:
-{{ toYaml . | indent 6 }}
-      {{- end -}}
+{{ toYaml . | indent 6 }}{{- end }}
       {{ with .Values.agent.initContainers -}}
       initContainers:
-{{ toYaml . | indent 6 -}}
-      {{- end -}}
+{{ toYaml . | indent 6 }}{{- end }}
       containers:
       - name: main
         image: {{ .Values.kraken.repository }}/kraken-agent:{{ .Values.kraken.tag }}
