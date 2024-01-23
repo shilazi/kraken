@@ -34,7 +34,7 @@ server {
 
   {{.client_verification}}
 
-  access_log {{.access_log_path}};
+  access_log {{.access_log_path}} json;
   error_log {{.error_log_path}};
 
   gzip on;
