@@ -20,6 +20,7 @@ import (
 	"net/http"
 	_ "net/http/pprof" // Registers /debug/pprof endpoints in http.DefaultServeMux.
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/docker/distribution"
@@ -31,7 +32,11 @@ import (
 	"github.com/uber/kraken/utils/log"
 )
 
-var _manifestRegexp = regexp.MustCompile(`^application/vnd.docker.distribution.manifest.v\d\+(json|prettyjws)`)
+var (
+	_imageMediaTypeRegexp    = regexp.MustCompile(`^application/vnd\.(oci|docker)\..*`)
+	_ociImageLayerRegexp     = regexp.MustCompile(`^application/vnd\.oci\.image\.layer\..*`)
+	_dockerImageRootfsRegexp = regexp.MustCompile(`^application/vnd\.docker\.image\.rootfs\..*`)
+)
 
 // PreheatHandler defines the handler of preheat.
 type PreheatHandler struct {
@@ -65,23 +70,44 @@ func (ph *PreheatHandler) Handle(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (ph *PreheatHandler) process(repo, digest string) error {
+	return ph.recursionProcess("root", repo, digest)
+}
+
+func (ph *PreheatHandler) recursionProcess(layer, repo, digest string) error {
+	log.Infof("recursion process layer %s, repo: %s, digest: %s", layer, repo, digest)
 	manifest, err := ph.fetchManifest(repo, digest)
 	if err != nil {
-		return err
+		log.Errorf("recursion process layer %s, fetchManifest: %s", layer, err)
+		return fmt.Errorf("fetch manifest: %s", err)
 	}
-	for _, desc := range manifest.References() {
-		d, err := core.ParseSHA256Digest(string(desc.Digest))
-		if err != nil {
-			log.With("repo", repo, "digest", string(desc.Digest)).Errorf("parse digest: %s", err)
-			continue
-		}
-		go func() {
-			log.With("repo", repo).Debugf("trigger origin cache: %+v", d)
-			_, err = ph.clusterClient.GetMetaInfo(repo, d)
-			if err != nil && !httputil.IsAccepted(err) {
-				log.With("repo", repo, "digest", digest).Errorf("notify origin cache: %s", err)
+	refs, err := dockerutil.GetManifestReferences(manifest)
+	if err != nil {
+		log.Errorf("recursion process layer %s, GetManifestReferences: %s", layer, err)
+		return fmt.Errorf("get manifest references: %s", err)
+	}
+	recursionMediaTypes := dockerutil.GetSupportedManifestTypes()
+	for i, ref := range refs {
+		mediaType := ref.MediaType
+		rLayer := fmt.Sprintf("%s-%d", layer, i)
+		rLayerInfo := fmt.Sprintf("recursion process layer: %s, mediaType: %s", rLayer, mediaType)
+		d, _ := core.ParseSHA256Digest(string(ref.Digest))
+		switch {
+		case strings.Contains(recursionMediaTypes, mediaType):
+			err = ph.recursionProcess(rLayer, repo, d.String())
+			if err != nil {
+				log.Errorf("%s, err: %s", rLayerInfo, err)
 			}
-		}()
+		case _ociImageLayerRegexp.MatchString(mediaType) || _dockerImageRootfsRegexp.MatchString(mediaType):
+			go func(repo string, digest core.Digest) {
+				log.With("repo", repo, "digest", digest).Infof("trigger origin cache: %+v", digest)
+				_, err = ph.clusterClient.GetMetaInfo(repo, digest)
+				if err != nil && !httputil.IsAccepted(err) {
+					log.With("repo", repo, "digest", digest).Errorf("notify origin cache: %s", err)
+				}
+			}(repo, d)
+		default:
+			log.Debugf("%s, not image layer, omit", rLayerInfo, err)
+		}
 	}
 	return nil
 }
@@ -122,10 +148,9 @@ func (ph *PreheatHandler) fetchManifest(repo, digest string) (distribution.Manif
 
 // filterEvents pick out the push manifest events.
 func filterEvents(notification *Notification) []*Event {
-	events := []*Event{}
-
+	var events []*Event
 	for _, event := range notification.Events {
-		isManifest := _manifestRegexp.MatchString(event.Target.MediaType)
+		isManifest := _imageMediaTypeRegexp.MatchString(event.Target.MediaType)
 		if !isManifest {
 			continue
 		}

@@ -119,14 +119,17 @@ func ParseManifestV2List(bytes []byte) (distribution.Manifest, core.Digest, erro
 }
 
 // GetManifestReferences returns a list of references by a V2 manifest
-func GetManifestReferences(manifest distribution.Manifest) ([]core.Digest, error) {
-	var refs []core.Digest
+func GetManifestReferences(manifest distribution.Manifest) ([]distribution.Descriptor, error) {
+	var refs []distribution.Descriptor
 	for _, desc := range manifest.References() {
-		d, err := core.ParseSHA256Digest(string(desc.Digest))
+		_, err := core.ParseSHA256Digest(string(desc.Digest))
 		if err != nil {
 			return nil, fmt.Errorf("parse digest: %s", err)
 		}
-		refs = append(refs, d)
+		refs = append(refs, distribution.Descriptor{
+			Digest:    desc.Digest,
+			MediaType: desc.MediaType,
+		})
 	}
 	return refs, nil
 }
