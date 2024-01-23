@@ -27,7 +27,7 @@ spec:
       - name: redis
         image: redis:5.0
       - name: main
-        image: {{ .Values.kraken.repository }}/kraken-tracker:{{ .Values.kraken.tag }}
+        image: {{ .Values.kraken.repository }}:{{ .Values.kraken.tag }}
         imagePullPolicy: {{ .Values.kraken.imagePullPolicy }}
         command:
         - /bin/bash

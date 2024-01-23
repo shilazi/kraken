@@ -112,6 +112,15 @@ All Kraken components can be deployed as Docker containers. To build the Docker 
 ```
 $ make images
 ```
+
+To build the all-in-one Docker image:
+```
+$ docker build --push \
+      --file docker/all-in-one/Dockerfile \
+      --tag ghcr.io/shilazi/kraken:v0.1.5 . \
+      --label org.opencontainers.image.source=https://github.com/shilazi/kraken
+```
+
 For information about how to configure and use Kraken, please refer to the [documentation](docs/CONFIGURATION.md).
 
 ## Kraken on Kubernetes

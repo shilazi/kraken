@@ -1,6 +1,6 @@
 castore:
-  upload_dir: /var/cache/kraken/kraken-proxy/upload/
-  cache_dir:  /var/cache/kraken/kraken-proxy/cache/
+  upload_dir: /var/kraken/cache/kraken-proxy-upload/
+  cache_dir:  /var/kraken/cache/kraken-proxy-cache/
   capacity: 1024
 
 zap:
@@ -21,10 +21,10 @@ zap:
     callerEncoder: short
   outputPaths:
   - stdout
-  - /var/log/kraken/kraken-proxy/stdout.log
+  - /var/kraken/log/kraken-proxy-stdout.log
   errorOutputPaths:
   - stderr
-  - /var/log/kraken/kraken-proxy/stderr.log
+  - /var/kraken/log/kraken-proxy-stderr.log
 
 metrics:
   m3:
@@ -46,5 +46,5 @@ registryoverride:
 
 nginx:
   name: kraken-proxy
-  log_dir: /var/log/kraken/kraken-proxy/
-  cache_dir: /var/cache/kraken/kraken-proxy/nginx/
+  log_dir: /var/kraken/log/
+  cache_dir: /var/kraken/cache/kraken-proxy-nginx/
