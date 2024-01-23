@@ -33,6 +33,8 @@ import (
 )
 
 var (
+	_manifestApiRegexp       = regexp.MustCompile(`^v2/.*/sha256:[a-z0-9]+`)
+	_nexusBlobApiRegexp      = regexp.MustCompile(`^v2/-/blobs/sha256:[a-z0-9]+`)
 	_imageMediaTypeRegexp    = regexp.MustCompile(`^application/vnd\.(oci|docker)\..*`)
 	_ociImageLayerRegexp     = regexp.MustCompile(`^application/vnd\.oci\.image\.layer\..*`)
 	_dockerImageRootfsRegexp = regexp.MustCompile(`^application/vnd\.docker\.image\.rootfs\..*`)
@@ -43,6 +45,12 @@ type PreheatHandler struct {
 	clusterClient blobclient.ClusterClient
 }
 
+// preheatImage defines the repo and digest of preheat image.
+type preheatImage struct {
+	Repository string
+	Digest     string
+}
+
 // NewPreheatHandler creates a new preheat handler.
 func NewPreheatHandler(client blobclient.ClusterClient) *PreheatHandler {
 	return &PreheatHandler{client}
@@ -50,15 +58,29 @@ func NewPreheatHandler(client blobclient.ClusterClient) *PreheatHandler {
 
 // Handle notifies origins to cache the blob related to the image.
 func (ph *PreheatHandler) Handle(w http.ResponseWriter, r *http.Request) error {
-	var notification Notification
-	if err := json.NewDecoder(r.Body).Decode(&notification); err != nil {
+	// use map receive data first
+	var data map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		return handler.Errorf("decode body: %s", err)
 	}
 
-	events := filterEvents(&notification)
-	for _, event := range events {
-		repo := event.Target.Repository
-		digest := event.Target.Digest
+	// then marshal data to byte again, use different event backend parse
+	b, _ := json.Marshal(data)
+	preheatImages, err := parseRegistryEvent(b)
+	if err != nil {
+		preheatImages, err = parseNexusEvent(b)
+		if err != nil {
+			return handler.Errorf("parse event: %s", err)
+		} else {
+			log.Debugf("parse nexus event success")
+		}
+	} else {
+		log.Debugf("parse registry event success")
+	}
+
+	for _, image := range preheatImages {
+		repo := image.Repository
+		digest := image.Digest
 
 		log.With("repo", repo, "digest", digest).Infof("deal push image event")
 		err := ph.process(repo, digest)
@@ -146,8 +168,30 @@ func (ph *PreheatHandler) fetchManifest(repo, digest string) (distribution.Manif
 	return manifest, nil
 }
 
-// filterEvents pick out the push manifest events.
-func filterEvents(notification *Notification) []*Event {
+// parseRegistryEvent parse to registry struct with event data
+func parseRegistryEvent(b []byte) ([]*preheatImage, error) {
+	var notification Notification
+	if err := json.Unmarshal(b, &notification); err != nil {
+		return nil, fmt.Errorf("unmarshal registry event: %s", err)
+	}
+
+	events := filterRegistryEvents(&notification)
+	if len(events) == 0 {
+		return nil, fmt.Errorf("registry event valid list is empty")
+	}
+
+	var preheatImages []*preheatImage
+	for _, event := range events {
+		preheatImages = append(preheatImages, &preheatImage{
+			Repository: event.Target.Repository,
+			Digest:     event.Target.Digest,
+		})
+	}
+	return preheatImages, nil
+}
+
+// filterRegistryEvents pick out the push manifest events.
+func filterRegistryEvents(notification *Notification) []*Event {
 	var events []*Event
 	for _, event := range notification.Events {
 		isManifest := _imageMediaTypeRegexp.MatchString(event.Target.MediaType)
@@ -161,4 +205,50 @@ func filterEvents(notification *Notification) []*Event {
 		}
 	}
 	return events
+}
+
+//parseNexusEvent parse to nexus struct with event data
+func parseNexusEvent(b []byte) ([]*preheatImage, error) {
+	var nexusEvent NexusEvent
+	if err := json.Unmarshal(b, &nexusEvent); err != nil {
+		return nil, fmt.Errorf("unmarshal nexus event: %s", err)
+	}
+
+	assetName := filterNexusEvent(&nexusEvent)
+	if len(assetName) == 0 {
+		return nil, fmt.Errorf("nexus event format or action not match")
+	}
+
+	assetSplit := strings.Split(assetName, "/manifests/")
+	if _, err := core.ParseSHA256Digest(assetSplit[1]); err != nil {
+		return nil, fmt.Errorf("nexus event parse digest: %s", err)
+	}
+
+	preheatImages := []*preheatImage{
+		{
+			Repository: assetSplit[0],
+			Digest:     assetSplit[1],
+		},
+	}
+	return preheatImages, nil
+}
+
+// filterNexusEvent pick out the CREATED docker format event.
+func filterNexusEvent(nexusEvent *NexusEvent) string {
+	validAction := nexusEvent.Action == "CREATED"
+	validFormat := nexusEvent.Asset != nil && nexusEvent.Asset.Format == "docker"
+
+	if !validAction || !validFormat {
+		return ""
+	}
+
+	assetName := nexusEvent.Asset.Name
+	if _nexusBlobApiRegexp.MatchString(assetName) {
+		return ""
+	}
+
+	if !_manifestApiRegexp.MatchString(assetName) {
+		return ""
+	}
+	return strings.Replace(assetName, "v2/", "", 1)
 }
