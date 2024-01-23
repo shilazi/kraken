@@ -23,7 +23,7 @@ spec:
     spec:
       {{ with .Values.proxy.initContainers -}}
       initContainers:
-{{ toYaml . | indent 6 }}{{ end }}
+{{ toYaml . | indent 6 }}{{- end }}
       containers:
       - name: main
         image: {{ .Values.kraken.repository }}/kraken-proxy:{{ .Values.kraken.tag }}
@@ -32,6 +32,7 @@ spec:
         - /usr/bin/kraken-proxy
         - --config={{ .Values.proxy.config }}
         - --port=80
+        - --server-port=81
         volumeMounts:
         - name: config
           mountPath: /etc/config
@@ -55,3 +56,8 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 80
+    name: registry
+  - protocol: TCP
+    port: 81
+    targetPort: 81
+    name: preheat
