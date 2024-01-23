@@ -98,6 +98,7 @@ http {
        '"responseTime":$request_time,'
        '"esStatusCode":"$status",'
        '"content_type":"$content_type",'
+       '"accept":"$http_accept",'
        '"email":"$http_x_auth_params_email",'
        '"uberSource":"$http_x_uber_source",'
        '"callsite":"$http_x_uber_callsite",'
