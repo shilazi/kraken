@@ -32,6 +32,12 @@ RUN set -x \
 
 FROM docker.io/library/debian:12
 
+ARG TARGETOS
+ARG TARGETARCH
+
+ENV RUNTIME_OS=$TARGETOS
+ENV RUNTIME_ARCH=$TARGETARCH
+
 RUN set -x \
     && DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y \
