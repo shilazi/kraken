@@ -7,8 +7,6 @@ tracker:
     dns: kraken-tracker:80
 {{- end -}}
 
-
-
 {{- define "origins" -}}
 origin:
   hosts:
@@ -19,8 +17,6 @@ origin:
 cluster:
   dns: kraken-origin:80
 {{- end -}}
-
-
 
 {{- define "build-index" -}}
 build_index:
@@ -33,8 +29,6 @@ cluster:
   hosts:
     dns: kraken-build-index:80
 {{- end -}}
-
-
 
 {{- define "tls" -}}
 tls:
