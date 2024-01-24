@@ -39,11 +39,12 @@ Below is the visualization of a small Kraken cluster at work:
 # Features
 
 Following are some highlights of Kraken:
+
 - **Highly scalable**. Kraken is capable of distributing Docker images at > 50% of max download
   speed limit on every host. Cluster size and image size do not have significant impact on download
   speed.
-  - Supports at least 15k hosts per cluster.
-  - Supports arbitrarily large blobs/layers. We normally limit max size to 20G for best performance.
+    - Supports at least 15k hosts per cluster.
+    - Supports arbitrarily large blobs/layers. We normally limit max size to 20G for best performance.
 - **Highly available**. No component is a single point of failure.
 - **Secure**. Support uploader authentication and data integrity protection through TLS.
 - **Pluggable storage options**. Instead of managing data, Kraken plugs into reliable blob storage
@@ -73,26 +74,26 @@ talk](https://www.youtube.com/watch?v=waVtYYSXkXU) at KubeCon + CloudNativeCon.
 ![](assets/architecture.svg)
 
 - Agent
-  - Deployed on every host
-  - Implements Docker registry interface
-  - Announces available content to tracker
-  - Connects to peers returned by tracker to download content
+    - Deployed on every host
+    - Implements Docker registry interface
+    - Announces available content to tracker
+    - Connects to peers returned by tracker to download content
 - Origin
-  - Dedicated seeders
-  - Stores blobs as files on disk backed by pluggable storage (e.g. S3, GCS)
-  - Forms a self-healing hash ring to distribute load
+    - Dedicated seeders
+    - Stores blobs as files on disk backed by pluggable storage (e.g. S3, GCS)
+    - Forms a self-healing hash ring to distribute load
 - Tracker
-  - Tracks which peers have what content (both in-progress and completed)
-  - Provides ordered lists of peers to connect to for any given blob
+    - Tracks which peers have what content (both in-progress and completed)
+    - Provides ordered lists of peers to connect to for any given blob
 - Proxy
-  - Implements Docker registry interface
-  - Uploads each image layer to the responsible origin (remember, origins form a hash ring)
-  - Uploads tags to build-index
+    - Implements Docker registry interface
+    - Uploads each image layer to the responsible origin (remember, origins form a hash ring)
+    - Uploads tags to build-index
 - Build-Index
-  - Mapping of human readable tag to blob digest
-  - No consistency guarantees: client should use unique tags
-  - Powers image replication between clusters (simple duplicated queues with retry)
-  - Stores tags as files on disk backed by pluggable storage (e.g. S3, GCS)
+    - Mapping of human readable tag to blob digest
+    - No consistency guarantees: client should use unique tags
+    - Powers image replication between clusters (simple duplicated queues with retry)
+    - Stores tags as files on disk backed by pluggable storage (e.g. S3, GCS)
 
 # Benchmark
 
