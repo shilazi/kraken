@@ -1,3 +1,14 @@
+**Table of Contents**
+
+- [Concept](#concept)
+- [Architecture](#architecture)
+- [Deployment](#deployment)
+- [Work flow](#work-flow)
+- [Use Case](#use-case)
+- [Notes](#notes)
+
+# Harbor Integration
+
 ## Concept
 Harbor is the only container repository project in CNCF. And it supports image management, replication, CVE scan and so on. It could be used in production.
 
@@ -14,7 +25,8 @@ So you can see that Harbor and Kraken share the same docker registry as backend 
 Here we use [helm chart](https://github.com/goharbor/harbor-helm) from Harbor community to deploy them. and also [helm chart](https://github.com/uber/kraken/tree/master/helm) from Kraken community to deploy them.
 
 We should modify two config file additionally,
-1. modify the backend of kraken-origin and kraken-buildindex and make it refer to harbor-registry.
+
+1. modify the backend of kraken-origin and kraken-build-index and make it refer to harbor-registry.
 2. modify config file of harbor-registry. add another notification hook for kraken.
 
 As following,
@@ -24,67 +36,67 @@ harbor-registry configmap
 ## add the second endpoint in notifications
     notifications:
       endpoints:
-        - name: harbor
-          disabled: false
-          url: http://harbor-core.repo.svc.cluster.local/service/notifications
-          timeout: 3000ms
-          threshold: 5
-          backoff: 1s
-        - name: kraken
-          disabled: false
-          url: http://kraken-proxy.p2p.svc.cluster.local:10050/registry/notifications
-          timeout: 3000ms
-          threshold: 5
-          backoff: 1s
+      - name: harbor
+        disabled: false
+        url: http://harbor-core.repo.svc.cluster.local/service/notifications
+        timeout: 3000ms
+        threshold: 5
+        backoff: 1s
+      - name: kraken
+        disabled: false
+        url: http://kraken-proxy.p2p.svc.cluster.local:81/registry/notifications
+        timeout: 3000ms
+        threshold: 5
+        backoff: 1s
 ```
 
 kraken-origin,kraken-buildindex,
 
 ```yaml
     backends:
-      - namespace: .*
-        backend:
-          registry_blob:
-            address: harbor-registry.repo.svc.cluster.local:5000
-            security:
-              basic:
-                username: "admin"
-                password: "XXXXX"
+    - namespace: .*
+      backend:
+        registry_blob:
+          address: harbor-registry.repo.svc.cluster.local:5000
+          security:
+            basic:
+              username: "admin"
+              password: "XXXXX"
 ```
 
 You should add more configuration about TLS if the domain name of your Harbor use a self-signed SSL certificate. It will throws a X509 error if not.
 
 ```yaml
     backends:
-      - namespace: .*
-        backend:
-          registry_blob:
-            address: harbor-registry.repo.svc.cluster.local:5000
-            security:
-              basic:
-                username: "admin"
-                password: "XXXXX"
-              tls:
-                client:
-                  cert:
-                    path: /etc/certs/XXX.crt
-                  key:
-                    path: /etc/certs/XXX.key
-                cas:
-                  - path: /etc/certs/ca.crt
-                  
+    - namespace: .*
+      backend:
+        registry_blob:
+          address: harbor-registry.repo.svc.cluster.local:5000
+          security:
+            basic:
+              username: "admin"
+              password: "XXXXX"
+            tls:
+              client:
+                cert:
+                  path: /etc/certs/XXX.crt
+                key:
+                  path: /etc/certs/XXX.key
+              cas:
+                - path: /etc/certs/ca.crt
 ```
 
 You can pull images using a `localhost` domain by P2P distribution after you deploy kraken-agent in your k8s nodes using daemonSet.
 
-For example, there is an image called  `hub.harbor.com/library/debian:latest`, then you can pull it using `localhost:13000/library/debian:latest`.
+For example, there is an image called  `hub.harbor.com/library/debian:latest`, then you can pull it using `localhost:30081/library/debian:latest`.
 
 ## Work flow
 I describe the work flow of pushing and pulling images briefly here,
+
 1. User push an image named `docker push hub.harbor.com/library/debian:latest` to Harbor.
 2. Harbor-registry will trigger a notification of pushManifest event to kraken-proxy.
 3. Kraken-proxy will fetch the manifest and notify kraken-origin to cache related blobs after receiving the pushManifest event.
-4. User will try to pull image by `docker pull localhost:13000/library/debian:latest`
+4. User will try to pull image by `docker pull localhost:30081/library/debian:latest`
 5. Then the P2P distribution work flow. but kraken-origin has cached these blobs before P2P distribution starts. it will save the time of fetching blobs from harbor-registry.
 6. Pulling image is completed.
 
